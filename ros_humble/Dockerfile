@@ -6,7 +6,8 @@ ENV NODE_VERSION=20
 
 RUN apt update && apt install --no-install-recommends -y \
     ninja-build gettext cmake unzip curl build-essential curl python3-venv \
-    ros-$ROS_DISTRO-rmw-cyclonedds-cpp ros-$ROS_DISTRO-rviz2 iputils-ping
+    iputils-ping ros-$ROS_DISTRO-rmw-cyclonedds-cpp ros-$ROS_DISTRO-rviz2  \
+    ros-$ROS_DISTRO-gazebo-dev
 
 
 # Install Neovim
@@ -35,6 +36,7 @@ RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 RUN ~/.fzf/install --all
 
 
+# Setup .bashrc
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh # FZF" >> ~/.bashrc
 RUN echo "alias nv=nvim" >> ~/.bashrc
