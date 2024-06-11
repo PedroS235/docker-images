@@ -1,0 +1,152 @@
+#!/bin/bash
+# Author: Pedro Soares
+
+IMG_NAME="ros-humble-img"
+CONTAINER_NAME="ros-humble-env"
+DOCKERFILE_DIR_PATH="$HOME/Repos/docker-images/ros_humble/"
+SSH_PRIVATE_KEY_PATH="$HOME/.ssh_backup/id_ed25519"
+
+print_i() {
+    echo -e "\033[32m[INFO] - \033[0m${1}"
+}
+
+print_w() {
+    echo -e "\033[33m[WARN] - \033[0m${1}"
+}
+
+print_e() {
+    echo -e "\033[31m[ERROR] - \033[0m${1}"
+}
+
+prompt_user() {
+    read -p "$1 " response
+    echo "$response"
+}
+
+is_image_available() {
+    docker images | grep -q "$1"
+}
+
+is_container_created() {
+    docker ps --all | grep -q "$1"
+}
+
+is_container_running() {
+    docker ps | grep -q "$1"
+}
+
+build_image() {
+    if ! is_image_available $IMG_NAME; then
+        print_i "Building image..."
+        CURRENT_PWD=$(pwd)
+        cd $DOCKERFILE_DIR_PATH
+        docker build -t $IMG_NAME --ssh default=$SSH_PRIVATE_KEY_PATH .
+        cd $CURRENT_PWD
+    fi
+}
+
+create_container() {
+    if ! is_container_created $CONTAINER_NAME; then
+        print_i "Creating container"
+        docker run -it --name $CONTAINER_NAME \
+            --net=host --privileged -e DISPLAY=$DISPLAY \
+            -v ~/ros_repos/:/root/ros_ws:rw \
+            -v ~/.ssh:/root/.ssh_docker:rw $IMG_NAME
+    fi
+}
+
+start_container() {
+    print_i "Starting container"
+    if is_container_created; then
+        xhost +local:docker >/dev/null # Enable GUI apps to run on local machine
+        docker start $CONTAINER_NAME
+    fi
+}
+
+run_container() {
+    docker exec -ti $CONTAINER_NAME bash
+}
+
+stop_container() {
+    if is_container_running $CONTAINER_NAME; then
+        docker stop $CONTAINER_NAME
+    fi
+}
+
+rm_container() {
+    docker rm $CONTAINER_NAME
+}
+
+# Check if any arguments are passed. If none, run container
+if [ $# -eq 0 ]; then
+    build_image
+    if ! is_container_created $CONTAINER_NAME; then
+        create_container
+    else
+        start_container
+        run_container
+    fi
+    exit 0
+fi
+
+print_help() {
+    echo -e "This is a management script for your ros virtual environment."
+    echo -e "You can build, create and execute your ros virtual environment."
+    echo -e "In case you run this script without any arguments, it will make sure"
+    echo -e "to build, create and run the container first.\n"
+    echo -e "Available arguments:"
+    echo -e "\t * -h or --help: Prints out this text."
+    echo -e "\t * -s or --stop: Stops the container if running."
+    echo -e "\t * -rm or --remove: Remove the container if existant."
+    echo -e "\t * -c or --create: Creates the container from image."
+    echo -e "\t * -b or --build: Builds the image."
+}
+
+# Process Arguments
+for arg in "$@"; do
+    case $arg in
+    -s | --stop)
+        print_i "Stopping $CONTAINER_NAME."
+        stop_container
+        ;;
+    -rm | --remove)
+        if is_container_running; then
+            print_i "Container $CONTAINER_NAME is still running.\nWould you like to stop it now? [Y/n]"
+            response=$(prompt_user)
+
+            case $response in
+            [Yy]* | "")
+                print_i "Stopping and removing container $CONTAINER_NAME."
+                stop_container
+                rm_container
+                ;;
+            [Nn]* | "")
+                print_e "Cannot rm container. Please stop the container first!"
+                exit 1
+                ;;
+            *)
+                print_e "Please type Yy or Nn"
+                exit 1
+                ;;
+            esac
+        fi
+        ;;
+    -c | --create)
+        print_i "Create container"
+        create_container
+        print_i "You can now run <ros> to execute the container"
+        ;;
+    -b | --build)
+        if ! is_image_available $IMG_NAME; then
+            print_i "Note that you will need to create the container first. See --help"
+        fi
+        build_image
+        ;;
+    -h | --help)
+        print_help
+        ;;
+    *)
+        print_i "Not recogenized"
+        ;;
+    esac
+done

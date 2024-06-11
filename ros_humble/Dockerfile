@@ -1,8 +1,7 @@
 FROM osrf/ros:humble-desktop-full
-# FROM ros:iron
 
 # Environment Variables
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp 
 ENV NODE_VERSION=20
 
 RUN apt update && apt install --no-install-recommends -y \
@@ -39,8 +38,6 @@ RUN ~/.fzf/install --all
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN echo "[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh # FZF" >> ~/.bashrc
 RUN echo "alias nv=nvim" >> ~/.bashrc
-
-# VOLUME [ "tmp/.X11-unix:/tmp/.X11-unix:rw" ]
-# VOLUME [ "/home/pedros235/ros_repos/:/root/ros_ws:rw" ]
+RUN echo "set -o vi" >> ~/.bashrc
 
 WORKDIR /root/ros_ws
