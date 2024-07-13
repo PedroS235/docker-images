@@ -1,0 +1,20 @@
+[user]
+	email = pmbs.123@gmail.com
+	name = Pedro Soares
+[init]
+	defaultBranch = main
+[core]
+	editor = nvim
+[alias]
+	co = checkout
+    br = branch
+    c = commit
+    cm = commit -m
+    a = add
+    s = status
+    ps = push
+    pl = pull
+    logl = log --oneline --graph --all --decorate
+    logg = log --graph --all --decorate --abbrev-commit 
+[pull]
+	rebase = false
