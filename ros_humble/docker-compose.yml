@@ -1,0 +1,19 @@
+services:
+  ros_humble_venv:
+    image: ros-humble-img
+    container_name: ros_humble_venv
+    build:
+      context: $DOCKERFILE_DIR_PATH
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+        ssh_prv_key: ${SSH_PRIVATE_KEY_PATH}
+        ssh_pub_key: ${SSH_PUBLIC_KEY_PATH}
+    volumes:
+      - ~/venv_ros_personal/:/home/user/ros_ws:rw
+    environment:
+      - DISPLAY=${DISPLAY}
+    network_mode: "host"
+    privileged: true
+    stdin_open: true
+    tty: true

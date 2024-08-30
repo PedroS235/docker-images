@@ -1,4 +1,5 @@
-FROM osrf/ros:humble-desktop-full
+# FROM osrf/ros:humble-desktop-full
+FROM ros:humble
 
 # Environment Variables
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp 
@@ -48,9 +49,16 @@ RUN sudo apt-get install -y nodejs
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 RUN ~/.fzf/install --all
 
+# Install Lazygit
+RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') && \
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" && \
+    tar xf lazygit.tar.gz lazygit && \
+    sudo install lazygit /usr/local/bin && \
+    rm lazygit.tar.gz lazygit
+
 # Install Cargo 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH=$HOME/.cargo/bin:$PATH
+ENV PATH=/home/user/.cargo/bin:$PATH
 
 # Install Mprocs
 RUN /home/user/.cargo/bin/cargo install mprocs

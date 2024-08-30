@@ -51,10 +51,23 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-source /opt/ros/humble/setup.bash
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh # FZF
-alias nv=nvim
-set -o vi
+# ===========================================================
+# END OF GENERATED BASH
+# ===========================================================
 
+# Sourcing/Evaluations
+source /opt/ros/$ROS_DISTRO/setup.bash
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh # FZF
 eval "$(starship init bash)"
-export PATH=$PATH:$HOME/.cargo/bin
+
+# Exports
+export PATH=$PATH:$HOME/.cargo/bin:$HOME/.local/bin
+
+# Aliases
+alias nv=nvim
+alias colconbuild='colcon build --symlink-install --continue-on-error --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
+alias colconsource='source install/setup.bash'
+alias lz='lazygit'
+
+# Enable vim mode
+set -o vi
