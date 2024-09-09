@@ -57,7 +57,7 @@ alias l='ls -CF'
 
 # Sourcing/Evaluations
 source /opt/ros/$ROS_DISTRO/setup.bash
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh # FZF
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash # FZF
 eval "$(starship init bash)"
 
 # Exports
